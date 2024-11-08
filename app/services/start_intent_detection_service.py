@@ -1,6 +1,6 @@
 from transformers import pipeline
-from app.services.csv_upload_service import uploaded_csv_data
 import pandas as pd
+from app.services.csv_upload_service import uploaded_csv_data
 
 class IntentService:
     # Lade das Modell einmalig in einer Pipeline für Textklassifikation
