@@ -1,17 +1,19 @@
-# app/database.py
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
-DATABASE_URL = "postgresql://user:password@localhost/dbname"  # oder ein anderer DB-URL je nach DB
+# Konfiguration der Datenbank-URL (z.B. SQLite)
+DATABASE_URL = "sqlite:///./kumocloud.db"  # SQLite-Datenbank
 
+# Erstellen des Datenbank-Engines
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
+# Erstellen der SessionLocal-Klasse
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Diese Funktion wird verwendet, um eine neue Session zu erhalten
 def get_db():
-    db = SessionLocal()
+    db = SessionLocal()  # Neue Session wird erstellt
     try:
         yield db
     finally:
-        db.close()
+        db.close()  # Schließe die Session nach der Nutzung
