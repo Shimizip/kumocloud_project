@@ -1,19 +1,31 @@
 # Globale Variable für den Job-Status und Fortschritt
-job_status = {"status": "not started", "progress": 0, "is_canceled": False}
+jobStatus = {"status": "not started", "progress": 0, "is_canceled": False, "job_id": None}
 
 class JobStatusService:
     @staticmethod
     def set_job_status(status: str, progress: int):
-        job_status["status"] = status
-        job_status["progress"] = progress
+        jobStatus["status"] = status
+        jobStatus["progress"] = progress
 
     @staticmethod
     def get_job_status():
-        return job_status
+        return jobStatus
     
     @staticmethod
     def cancel_job():
-        job_status["status"] = "canceled"
-        job_status["is_canceled"] = True
+        jobStatus["status"] = "canceled"
+        jobStatus["is_canceled"] = True
+
+    @staticmethod
+    def clear_job():
+        jobStatus["status"] = "not started"
+        jobStatus["progress"] = 0
+        jobStatus["is_canceled"] = False
+        jobStatus["job_id"] = None
+    
+    @staticmethod
+    def check_if_job_in_progress() -> bool:
+        return jobStatus["status"] == "in progress"
+
     
 

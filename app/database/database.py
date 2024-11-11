@@ -1,19 +1,26 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+# app/database/db_service.py
+from sqlalchemy import create_engine, Column, Integer, String, JSON, DateTime, LargeBinary
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+import uuid
 
-# Konfiguration der Datenbank-URL (z.B. SQLite)
-DATABASE_URL = "sqlite:///./kumocloud.db"  # SQLite-Datenbank
+Base = declarative_base()
 
-# Erstellen des Datenbank-Engines
-engine = create_engine(DATABASE_URL)
+class Job(Base):
+    __tablename__ = "jobs"
+    
+    id = Column(String, primary_key=True, index=True)
+    status = Column(String, index=True)
+    progress = Column(Integer)
+    result = Column(JSON)  # Speichert die Intentionsergebnisse als JSON
+    csv_file = Column(LargeBinary)  # Speichert die CSV-Datei als BLOB
+    csv_filename = Column(String)  # Speichert den Dateinamen der CSV
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-# Erstellen der SessionLocal-Klasse
+# Erstelle die Engine und Session
+engine = create_engine("sqlite:///./jobs.db")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Diese Funktion wird verwendet, um eine neue Session zu erhalten
-def get_db():
-    db = SessionLocal()  # Neue Session wird erstellt
-    try:
-        yield db
-    finally:
-        db.close()  # Schließe die Session nach der Nutzung
+Base.metadata.create_all(bind=engine)
