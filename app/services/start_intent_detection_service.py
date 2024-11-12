@@ -1,12 +1,11 @@
 import asyncio
 from uuid import uuid4  # uuid4 aus dem uuid-Modul importieren
 from transformers import pipeline
-from fastapi import BackgroundTasks, HTTPException, Depends
-from app.database.database_service import get_db  # Importiere get_db
+from fastapi import BackgroundTasks, HTTPException
 from app.database.database_service import create_job
 from sqlalchemy.orm import Session
 import pandas as pd
-from app.services.csv_upload_service import uploaded_csv_data
+from app.services.csv_upload_service import  all_uploaded_csvs
 from app.services.job_status_service import jobStatus, JobStatusService
 
 import json
@@ -18,20 +17,28 @@ intent_classifier = pipeline("zero-shot-classification", model="facebook/bart-la
 class IntentService:
 
     @staticmethod
-    async def detect_intents(background_tasks: BackgroundTasks, db: Session = Depends(get_db()), max_intentions: int = 5):
-        if "data" not in uploaded_csv_data:
-            raise HTTPException(status_code=400, detail="Keine hochgeladene CSV-Datei gefunden.")
+    async def detect_intents(background_tasks: BackgroundTasks, db: Session, max_intentions: int = 5, file_name: str = None):
                 # Überprüfen, ob bereits ein Job läuft
         if JobStatusService.check_if_job_in_progress() :
             raise HTTPException(status_code=400, detail="Es läuft bereits ein Job. Bitte warten Sie, bis der aktuelle Job abgeschlossen ist.")
+        
         # Generiere eine UUID für den Job
-        job_id = str(uuid4())       
+        job_id = str(uuid4())
         # Starte den Job im Hintergrund
-        background_tasks.add_task(IntentService._run_intent_detection, db, job_id, max_intentions)
+        background_tasks.add_task(IntentService._run_intent_detection, db, job_id, max_intentions, file_name)
         return {"message": "Intent-Erkennung im Hintergrund gestartet.", "job_id": job_id}
     
     @staticmethod
-    async def _run_intent_detection(db: Session, job_id: str, max_intentions: int):
+    async def _run_intent_detection(db: Session, job_id: str, max_intentions: int, file_name: str):
+        print(f"Filename: {file_name}")
+        #Holen der csv aus all_uploaded_csvs anhand des angegebenen Names
+        uploaded_csv_data = next((item for item in all_uploaded_csvs if item["file_name"] == file_name), None) 
+        #Uenberpruefung ob die uploaded_csv_data valide ist
+        if uploaded_csv_data is None:
+            print("Kein CSV mit dem angegebenen Dateinamen gefunden.")
+            return None
+
+        uploaded_csv_data["job_id"]=job_id
 
         df = uploaded_csv_data["data"]
         
@@ -40,11 +47,12 @@ class IntentService:
         jobStatus["progress"] = 0
         jobStatus["is_canceled"] = False
         jobStatus["job_id"] = job_id
+        jobStatus["csv_name"] = file_name
 
         # Führe die Intentionserkennung auf dem gesamten DataFrame aus
         try:
-            intent_counts = await IntentService._perform_intent_detection(df)
             print("Intent Detection gestartet")
+            intent_counts = await IntentService._perform_intent_detection(df)
 
             # Sortiere die Ergebnisse nach Häufigkeit und füge ggf. Fallback hinzu
             sorted_intents = sorted(intent_counts.items(), key=lambda x: x[1], reverse=True)
@@ -67,16 +75,14 @@ class IntentService:
             if jobStatus["progress"] == 100 :
                 jobStatus["status"] = "completed"
                     # Speichern der CSV-Datei aus uploaded_csv_data in die Datenbank
-            csv_data = uploaded_csv_data["data"].to_csv(index=False).encode('utf-8')  # Umwandlung in Bytes
-            csv_filename = "uploaded_data.csv"  # Du kannst den Namen dynamisch setzen, falls gewünscht
+
             #Erstelle einen Eintrag des Jobs in der Datenbank
             create_job(db, 
-                       job_id=job_id ,
-                       status=jobStatus["status"],
-                       progress=jobStatus["progress"], 
-                       result=dict(selected_intents), 
-                       csv_file=csv_data, 
-                       csv_filename=csv_filename
+                       job_id,
+                       jobStatus["status"],
+                       jobStatus["progress"], 
+                       dict(selected_intents),
+                       jobStatus["csv_name"]
                        )
             JobStatusService.clear_job()
             

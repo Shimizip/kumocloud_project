@@ -1,5 +1,5 @@
 # Globale Variable für den Job-Status und Fortschritt
-jobStatus = {"status": "not started", "progress": 0, "is_canceled": False, "job_id": None}
+jobStatus = {"status": "not started", "progress": 0, "is_canceled": False, "job_id": None, "csv_name": None}
 
 class JobStatusService:
     @staticmethod

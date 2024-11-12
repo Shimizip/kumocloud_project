@@ -1,22 +1,21 @@
 # Funktion zum Speichern eines Jobs
-# app/services/db_service.py
+# app/services/database_service.py
 from sqlalchemy.orm import Session
-from app.database.database import Job, SessionLocal
-import uuid
+from app.database.database_config import Job, SessionLocal
 
-def create_job(db: Session, job_id: str, status: str, progress: int, result: dict, csv_data: bytes, csv_filename: str):
+def create_job(db: Session, job_id: str, status: str, progress: int, result: dict, csv_name: str):
     db_job = Job(
         id=job_id,
         status=status,
         progress=progress,
         result=result,
-        csv_file=csv_data,  # Speichere die CSV-Datei als BLOB
-        csv_filename=csv_filename  # Speichere den Dateinamen der CSV
+        csv_name=csv_name
     )
     db.add(db_job)
     db.commit()
     db.refresh(db_job)
     return db_job
+
 
 
 # Funktion zum Abrufen eines Jobs anhand der ID
