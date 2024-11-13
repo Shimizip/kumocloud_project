@@ -15,6 +15,7 @@ class Job(Base):
     progress = Column(Integer)
     result = Column(JSON)  # Speichert die Intentionsergebnisse als JSON
     csv_name = Column(String, index=True)
+    limit = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

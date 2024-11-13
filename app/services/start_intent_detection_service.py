@@ -2,7 +2,7 @@ import asyncio
 from uuid import uuid4  # uuid4 aus dem uuid-Modul importieren
 from transformers import pipeline
 from fastapi import BackgroundTasks, HTTPException
-from app.database.database_service import create_job
+from app.database.database_service import create_job, get_job_by_id
 from sqlalchemy.orm import Session
 import pandas as pd
 from app.services.csv_upload_service import  all_uploaded_csvs
@@ -82,11 +82,20 @@ class IntentService:
                        jobStatus["status"],
                        jobStatus["progress"], 
                        dict(selected_intents),
-                       jobStatus["csv_name"]
+                       jobStatus["csv_name"],
+                       max_intentions
                        )
             JobStatusService.clear_job()
-            
-            return dict(selected_intents)
+            #DEBUG
+            job_from_db = get_job_by_id(db, job_id)
+            if job_from_db:
+                print("Job-ID:", job_from_db.id)
+                print("Status:", job_from_db.status)
+                print("Progress:", job_from_db.progress)
+                print("Ergebnis:", job_from_db.result)
+            else:
+                print("Job nicht gefunden.")
+                return dict(selected_intents)
 
 
         
