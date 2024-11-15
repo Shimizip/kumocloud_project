@@ -18,10 +18,6 @@ class IntentService:
 
     @staticmethod
     async def detect_intents(background_tasks: BackgroundTasks, db: Session, max_intentions: int = 5, file_name: str = None):
-                # Überprüfen, ob bereits ein Job läuft
-        if JobStatusService.check_if_job_in_progress() :
-            raise HTTPException(status_code=400, detail="Es läuft bereits ein Job. Bitte warten Sie, bis der aktuelle Job abgeschlossen ist.")
-        
         # Generiere eine UUID für den Job
         job_id = str(uuid4())
         # Starte den Job im Hintergrund

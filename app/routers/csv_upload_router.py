@@ -7,6 +7,29 @@ router = APIRouter()
 
 @router.post("/upload-csv")
 async def upload_csv(files: List[UploadFile] = File(...)):
+    """
+    Endpoint zum Hochladen von CSV-Dateien.
+
+    Dieser Endpoint ermöglicht das Hochladen von mehreren CSV-Dateien. Jede Datei wird überprüft,
+    um sicherzustellen, dass sie im CSV-Format vorliegt und nicht bereits zuvor hochgeladen wurde.
+    Nach der Überprüfung werden die Dateien an einen Service zur weiteren Verarbeitung übergeben.
+    Benutzer können durch Klicken auf die Schaltfläche "Add String Item" zusätzliche Dateien auswählen 
+    und hinzufügen, die dann ebenfalls hochgeladen werden können.
+
+    Args:
+        files (List[UploadFile]): Eine Liste von Dateien, die als CSV-Dateien hochgeladen werden sollen.
+
+    Returns:
+        dict: Ein Dictionary mit einer Bestätigungsmeldung:
+            - Wenn der Upload erfolgreich war: {"message": "X CSV-Dateien erfolgreich hochgeladen und im Speicher gespeichert"}
+
+    Raises:
+        HTTPException:
+            - 415: Wenn eine Datei nicht im CSV-Format ist.
+            - 409: Wenn die Datei bereits hochgeladen wurde.
+            - 500: Bei einem internen Fehler während des Uploads.
+    """
+
     # Überprüfen, ob jede Datei im CSV-Format ist
     for file in files:
         if not file.filename.endswith(".csv"):

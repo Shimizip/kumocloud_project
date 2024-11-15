@@ -15,11 +15,20 @@ async def get_jobs_by_csv(
     """
     Endpoint zur Suche nach allen Job-IDs, die zu einer bestimmten CSV-Datei gehören.
 
+    Dieser Endpoint ermöglicht die Abfrage von Job-IDs, die mit einer bestimmten CSV-Datei verknüpft sind.
+    Die Job-IDs werden mithilfe des JobService aus der Datenbank abgerufen, um sicherzustellen, dass alle
+    relevanten Jobs für eine angegebene Datei zurückgegeben werden.
+
     Args:
-        file_name (str): Name der CSV-Datei, für die die Job-IDs abgerufen werden sollen.
-    
+        file_name (str): Der Name der CSV-Datei, für die die Job-IDs abgerufen werden sollen.
+
     Returns:
-        list: Liste der Job-IDs, die mit der angegebenen CSV-Datei verknüpft sind.
+        dict: Ein Dictionary, das eine Liste von Job-IDs enthält, die mit der angegebenen CSV-Datei verknüpft sind.
+        
+    Raises:
+        HTTPException:
+            - 404: Wenn keine Job-IDs für die angegebene CSV-Datei gefunden werden.
+            - 500: Bei einem internen Fehler während der Abfrage.
     """
     try:
         job_ids = JobService.get_job_ids_by_csv(db, file_name)

@@ -13,6 +13,24 @@ async def check_uploaded_data(
         description="Gib den Namen der hochgeladenen Datei ein, die du überprüfen möchtest",
     ),
 ):
+    """
+    Endpoint zur Überprüfung der hochgeladenen Daten.
+
+    Dieser Endpoint ermöglicht es, die hochgeladenen CSV-Daten zu überprüfen, indem eine Vorschau der ersten
+    `num_rows` Zeilen der angegebenen Datei zurückgegeben wird. Der Dateiname muss als Eingabeparameter übergeben werden.
+
+    Args:
+        num_rows (int): Die Anzahl der Zeilen, die aus der hochgeladenen Datei zurückgegeben werden sollen. (Standard: 5)
+        file_name (str, optional): Der Name der Datei, deren Daten überprüft werden sollen.
+
+    Returns:
+        dict: Ein Dictionary mit einer Erfolgsmeldung und einer Vorschau der angeforderten Zeilen der hochgeladenen Datei.
+        
+    Raises:
+        HTTPException:
+            - 404: Wenn die angegebene Datei nicht gefunden wird.
+    """
+    
     # Überprüfung, ob der Dateiname in all_uploaded_csvs existiert
     file_data = next((item["data"] for item in all_uploaded_csvs if item["file_name"] == file_name), None)
     

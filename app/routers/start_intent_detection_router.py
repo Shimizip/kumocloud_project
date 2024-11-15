@@ -2,6 +2,7 @@
 from fastapi import APIRouter, HTTPException, Query, BackgroundTasks, Depends
 from app.services.start_intent_detection_service import IntentService
 from app.database.database_service import get_db
+from app.services.job_status_service import JobStatusService
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.services.csv_upload_service import all_uploaded_csvs
@@ -23,18 +24,34 @@ async def start_intent_detection(background_tasks: BackgroundTasks,
                                 ),):
     """
     Endpoint zur Ausführung der Intent-Erkennung auf hochgeladenen Daten.
-    
+
+    Dieser Endpoint führt eine Intent-Erkennung auf den hochgeladenen CSV-Daten durch. Die Anzahl der maximal
+    zurückzugebenden Intentionen kann durch den Parameter `max_intentions` (1-10) angepasst werden.
+    Der Datei-Name, für die die Intent-Erkennung durchgeführt wird, wird ebenfalls als Eingabeparameter erwartet.
+    Es wird immer nur ein Job gestartet.
+
     Args:
-        max_intentions (int): Maximale Anzahl der zurückzugebenden Intentionen (Standard: 5)
-    
+        max_intentions (int): Maximale Anzahl der zurückzugebenden Intentionen (Standard: 5).
+            Die Zahl muss zwischen 1 und 10 liegen.
+        file_name (str, optional): Der Name der Datei, für die die Intent-Erkennung durchgeführt werden soll.
+
     Returns:
-        dict: Ergebnisse der Intent-Erkennung mit den häufigsten Intentionen und ggf. Fallback.
-    
+        dict: Ein Dictionary, das die Ergebnisse der Intent-Erkennung enthält, einschließlich der häufigsten Intentionen 
+              und ggf. einem Fallback für Nachrichten ohne erkannte Intentionen.
+
+    Raises:
+        HTTPException:
+            - 404: Wenn die angegebene Datei nicht gefunden wird.
+            - 500: Bei einem Fehler während der Durchführung der Intent-Erkennung.
     """
     file_data = next((item["data"] for item in all_uploaded_csvs if item["file_name"] == file_name), None)
 
     if file_data is None:
         raise HTTPException(status_code=404, detail="Die angegebene Datei wurde nicht gefunden.")
+    
+            # Überprüfen, ob bereits ein Job läuft
+    if JobStatusService.check_if_job_in_progress() :
+        raise HTTPException(status_code=400, detail="Es läuft bereits ein Job. Bitte warten Sie, bis der aktuelle Job abgeschlossen ist.")
     
     try:
         # Übergabe des dynamisch festgelegten Wertes für max_intentions an den Hintergrundjob

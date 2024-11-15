@@ -15,21 +15,34 @@ router = APIRouter()
 @router.get("/filter-results")
 async def job_filter(
     db: Session = Depends(get_db),
-    start_date: Optional[datetime] = Query(None, description="Startdatum (YYYY-MM-DD)"),
-    end_date: Optional[datetime] = Query(None, description="Enddatum (YYYY-MM-DD)"),
+    start_date: Optional[datetime] = Query(None, description="Startdatum (YYYY-MM-DD HH:MM)"),
+    end_date: Optional[datetime] = Query(None, description="Enddatum (YYYY-MM-DD HH:MM)"),
     file_name: Optional[str] = Query(None, title="Dateiname", description="Gib den Namen der Datei an, für die gefiltert werden soll"),
     job_id: Optional[str] = Query(None, title="Job ID", description="Gib die Job-ID ein, für dessen die Ergebnisse der Intent Detetion zurück gegebn werden sollen"),
     order: Order = Query(Order.desc, description="Sortierreihenfolge: 'desc' für häufigste zuerst, 'asc' für am wenigsten häufige zuerst")
 ):
     """
-    Endpoint zur Ausführung der Intent-Erkennung auf hochgeladenen Daten.
-    
+    Endpoint zur Filterung von Ergebnissen der Intent-Erkennung auf hochgeladenen Daten.
+
+    Dieser Endpoint ermöglicht die Filterung der Ergebnisse der Intent-Erkennung, basierend auf verschiedenen Parametern wie
+    Datum, Dateiname, Job-ID und der Sortierreihenfolge. Die gefilterten Ergebnisse basieren auf den hochgeladenen CSV-Daten.
+
     Args:
-        max_intentions (int): Maximale Anzahl der zurückzugebenden Intentionen (Standard: 5)
-    
+        db (Session): Die Datenbank-Session zur Durchführung der Filteroperationen.
+        start_date (datetime, optional): Das Startdatum im Format 'YYYY-MM-DD HH:MM', ab dem gefiltert werden soll.
+        end_date (datetime, optional): Das Enddatum im Format 'YYYY-MM-DD HH:MM', bis zu dem gefiltert werden soll.
+        file_name (str, optional): Der Name der CSV-Datei, für die gefiltert werden soll.
+        job_id (str, optional): Eine spezifische Job-ID, um die Ergebnisse eines bestimmten Jobs zu filtern.
+        order (str, optional): Die Sortierreihenfolge der Ergebnisse: 'desc' für häufigste zuerst, 'asc' für seltenste zuerst.
+
     Returns:
-        dict: Ergebnisse der Intent-Erkennung mit den häufigsten Intentionen und ggf. Fallback.
-    
+        dict: Ein Dictionary mit den gefilterten Ergebnissen der Intent-Erkennung, das die relevanten Intentionen und deren Häufigkeit enthält.
+
+    Raises:
+        HTTPException:
+            - 404: Wenn die angegebene CSV-Datei nicht gefunden wird.
+            - 400: Wenn das Enddatum vor dem Startdatum liegt.
+            - 500: Bei einem internen Fehler während des Filtervorgangs.
     """
     file_data = next((item["data"] for item in all_uploaded_csvs if item["file_name"] == file_name), None)
 
