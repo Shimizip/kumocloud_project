@@ -42,6 +42,7 @@ Dieses Projekt implementiert ein Backend zur Analyse und Intentionserkennung von
    Überprüfe die Installation mit:  
    ```bash
    docker --version
+   ```
 
 #### In den Root-Ordner navigieren
    Navigiere mit einer Kommandozeile (CMD/Bash) in den Root-Ordner des Projekts kumocloud_projekt.
@@ -49,14 +50,16 @@ Dieses Projekt implementiert ein Backend zur Analyse und Intentionserkennung von
 2. **Docker-Befehle ausführen**
 
     Für Linux:
-        ```bash
-        sudo docker build -t        kumocloud_app .
-        sudo docker run -p 8000:8000 kumocloud_app
+    ```bash
+    sudo docker build -t        kumocloud_app .
+    sudo docker run -p 8000:8000 kumocloud_app
+    ```
 
     Für Windows:
-        ```bash
-        docker build -t kumocloud_app .
-        docker run -p 8000:8000 kumocloud_app
+    ```bash
+    docker build -t kumocloud_app .
+    docker run -p 8000:8000 kumocloud_app
+    ```
 
 3. **Backend prüfen**
     Nach dem Start ist das Backend unter http://127.0.0.1:8000 erreichbar.
