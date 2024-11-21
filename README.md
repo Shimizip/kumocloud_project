@@ -37,28 +37,28 @@ Dieses Projekt implementiert ein Backend zur Analyse und Intentionserkennung von
 ## Setup-Anleitung
 
 ### Voraussetzungen
-  1. **Docker installieren:**  
+1. **Docker installieren:**  
    Lade die neueste Version von Docker herunter und installiere sie.  
    Überprüfe die Installation mit:  
    ```bash
    docker --version
 
-### In den Root-Ordner navigieren
-  2. Navigiere mit einer Kommandozeile (CMD/Bash) in den Root-Ordner des Projekts kumocloud_projekt.
+#### In den Root-Ordner navigieren
+   Navigiere mit einer Kommandozeile (CMD/Bash) in den Root-Ordner des Projekts kumocloud_projekt.
 
-  3. **Docker-Befehle ausführen**
+2. **Docker-Befehle ausführen**
 
     Für Linux:
         ```bash
-        sudo docker build -t kumocloud_app .
+        sudo docker build -t        kumocloud_app .
         sudo docker run -p 8000:8000 kumocloud_app
 
     Für Windows:
-      ```bash
+        ```bash
         docker build -t kumocloud_app .
         docker run -p 8000:8000 kumocloud_app
 
-  4. **Backend prüfen**
+3. **Backend prüfen**
     Nach dem Start ist das Backend unter http://127.0.0.1:8000 erreichbar.
     Die Swagger UI kann unter http://127.0.0.1:8000/docs aufgerufen werden.
 
